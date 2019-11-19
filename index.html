@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>Signature Pad demo</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $("#showPad").click(function () {
+                $("#signPad").toggle();
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <button id="showPad">Open Signature Pad</button>
+    <button id="donePad">Done</button>
+    <br>
+    <canvas id="signPad" width="500" height="500" style="border:1px solid #000000; display: none;"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@2.3.2/dist/signature_pad.min.js"></script>
+    <script>
+        var signPad = document.querySelector("#signPad");
+        var signaturePad = new SignaturePad(signPad);
+        var saveSVGButton = document.querySelector('#donePad');
+
+        function download(dataURL, filename) {
+            if (navigator.userAgent.indexOf("Safari") > -1 && navigator.userAgent.indexOf("Chrome") === -1) {
+                window.open(dataURL);
+            } else {
+                var blob = dataURLToBlob(dataURL);
+                var url = window.URL.createObjectURL(blob);
+
+                var a = document.createElement("a");
+                a.style = "display: none";
+                a.href = url;
+                a.download = filename;
+
+                document.body.appendChild(a);
+                a.click();
+
+                window.URL.revokeObjectURL(url);
+            }
+        }
+
+        function dataURLToBlob(dataURL) {
+            // Code taken from https://github.com/ebidel/filer.js
+            var parts = dataURL.split(';base64,');
+            var contentType = parts[0].split(":")[1];
+            var raw = window.atob(parts[1]);
+            var rawLength = raw.length;
+            var uInt8Array = new Uint8Array(rawLength);
+
+            for (var i = 0; i < rawLength; ++i) {
+                uInt8Array[i] = raw.charCodeAt(i);
+            }
+            return new Blob([uInt8Array], {
+                type: contentType
+            });
+        }
+        saveSVGButton.addEventListener("click", function (event) {
+            if (signaturePad.isEmpty()) {
+                alert("Please provide a signature first.");
+            } else {
+                var dataURL = signaturePad.toDataURL('image/svg+xml');
+                download(dataURL, "signature.svg");
+            }
+        });
+    </script>
+</body>
+
+</html>
